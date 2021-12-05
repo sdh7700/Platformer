@@ -33,6 +33,7 @@ public class PlayerMove : MonoBehaviour
         }
 
         // Direction Sprite
+        //spriteRenderer.flipX = rigid.velocity.x < 0;
         if (Input.GetButtonDown("Horizontal"))
             spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
 
@@ -66,5 +67,36 @@ public class PlayerMove : MonoBehaviour
                     anim.SetBool("isJumping", false);
             }
         }
+    }
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.tag == "Enemy")
+        {
+            OnDamaged(other.transform.position);
+        }
+    }
+
+    void OnDamaged(Vector2 targetPos)
+    {
+        // Change Layer ( Immortal Active)
+        gameObject.layer = 9;
+        // View Alpha
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        // Reaction Force
+        Debug.Log(transform.position.x + "," + targetPos.x);
+        int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
+        rigid.AddForce(new Vector2(dirc, 1) * 7, ForceMode2D.Impulse);
+
+        // Animation
+        anim.SetTrigger("doDamaged");
+
+        Invoke("OffDamaged", 2);
+    }
+
+    void OffDamaged()
+    {
+        gameObject.layer = 8;
+        spriteRenderer.color = new Color(1, 1, 1, 1);
     }
 }
